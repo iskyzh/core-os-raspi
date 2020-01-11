@@ -1,11 +1,15 @@
-# core-os-rust
+# core-os
 
 An OS in Rust.
 
 ## Reference
 
-https://github.com/rust-embedded/rust-raspi3-OS-tutorials
+[1] https://github.com/rust-embedded/rust-raspi3-OS-tutorials
 
-https://github.com/bztsrc/raspi3-tutorial/
+[2] https://github.com/bztsrc/raspi3-tutorial/
 
-https://os.phil-opp.com/
+[3] https://os.phil-opp.com/
+
+## Progress
+
+- [*] Make a bare-metal binary [1,2]
