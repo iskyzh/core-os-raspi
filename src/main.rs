@@ -1,7 +1,12 @@
 #![no_std]
 #![no_main]
 #![feature(asm)]
+#![feature(format_args_nl)]
 #![feature(global_asm)]
+#![feature(panic_info_message)]
+
+mod print;
+mod console;
 
 global_asm!(include_str!("start.S"));
 
@@ -9,6 +14,11 @@ use core::panic::PanicInfo;
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
+    if let Some(message) = _info.message() {
+        println!("kernel panic: {}", message);
+    } else {
+        println!("kernel panic!");
+    }
     loop {}
 }
 
@@ -51,5 +61,6 @@ unsafe extern "C" fn runtime_init() -> ! {
 }
 
 fn kernel_init() -> ! {
-    panic!()
+    println!("Hello, World!");
+    panic!("Stop.")
 }
