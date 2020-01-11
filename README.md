@@ -12,4 +12,4 @@ An OS in Rust.
 
 ## Progress
 
-- [*] Make a bare-metal binary [1,2]
+* [-] Make a bare-metal binary [1,2]

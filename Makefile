@@ -3,7 +3,7 @@ OUTPUT = kernel.img
 QEMU_BINARY = qemu-system-aarch64
 QEMU_MACHINE_TYPE = raspi3
 QEMU_MISC_ARGS = -serial stdio -display none
-LINKER_FILE = src/link.ld
+LINKER_FILE = src/bsp/rpi/link.ld
 RUSTC_MISC_ARGS = -C target-cpu=cortex-a53
 RUSTFLAGS = -C link-arg=-T$(LINKER_FILE) $(RUSTC_MISC_ARGS)
 TARGET_TYPE = release
@@ -16,11 +16,14 @@ OBJCOPY_CMD = cargo objcopy \
 all: $(OUTPUT)
 
 $(CARGO_OUTPUT): FORCE
-	RUSTFLAGS="$(RUSTFLAGS)" cargo xbuild --target $(TARGET) --$(TARGET_TYPE)
+	RUSTFLAGS="$(RUSTFLAGS)" cargo xbuild --target $(TARGET) --release
 
 $(OUTPUT): $(CARGO_OUTPUT)
 	$(OBJCOPY_CMD) $< ./$(OUTPUT)
 
 qemu: all
-	$(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE) -kernel kernel.img $(QEMU_MISC_ARGS)
+	$(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE) -kernel $(OUTPUT) $(QEMU_MISC_ARGS)
+
+clean:
+	rm -rf target
 FORCE:

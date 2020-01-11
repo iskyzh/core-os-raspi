@@ -1,5 +1,8 @@
 pub struct QEMUConsole;
 
+pub const BOOT_CORE_ID: u64 = 0;
+pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
+
 const QEMU_CONSOLE_ADDR: u64 = 0x3F20_1000;
 
 use core::fmt;

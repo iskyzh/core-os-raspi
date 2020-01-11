@@ -1,10 +1,10 @@
 use core::fmt;
 use core::fmt::Write;
-use crate::console;
+use crate::bsp::console;
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
-    console::console().write_fmt(args).unwrap();
+    console().write_fmt(args).unwrap();
 }
 
 #[macro_export]

@@ -5,15 +5,13 @@
 #![feature(global_asm)]
 #![feature(panic_info_message)]
 
-mod console;
+mod arch;
+mod bsp;
 mod memory;
 mod panic_handler;
 mod print;
 
-global_asm!(include_str!("start.S"));
-
-#[no_mangle]
-unsafe extern "C" fn runtime_init() -> ! {
+pub unsafe fn runtime_init() -> ! {
     use memory::zero_bss;
     zero_bss();
 

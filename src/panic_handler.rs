@@ -1,6 +1,7 @@
 use core::panic::PanicInfo;
 
 use crate::println;
+use crate::arch;
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
@@ -9,5 +10,5 @@ fn panic(_info: &PanicInfo) -> ! {
     } else {
         println!("kernel panic!");
     }
-    loop {}
+    arch::wait_forever();
 }
