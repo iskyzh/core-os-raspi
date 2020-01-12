@@ -1,5 +1,5 @@
 TARGET = aarch64-unknown-none-softfloat
-OUTPUT = kernel.img
+OUTPUT = kernel8.img
 QEMU_BINARY = qemu-system-aarch64
 QEMU_MACHINE_TYPE = raspi3
 QEMU_MISC_ARGS = -serial mon:stdio -display none

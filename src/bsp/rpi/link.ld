@@ -1,18 +1,31 @@
 SECTIONS
 {
+    /* Set current address to the value from which the RPi starts execution */
     . = 0x80000;
-    .text : { KEEP(*(.text._start)) *(.text .text.* .gnu.linkonce.t*) }
-    .rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) }
-    PROVIDE(_data = .);
-    .data : { *(.data .data.* .gnu.linkonce.d*) }
-    .bss (NOLOAD) : {
-        . = ALIGN(16);
+
+    .text :
+    {
+        *(.text._start) *(.text*)
+    }
+
+    .rodata :
+    {
+        *(.rodata*)
+    }
+
+    .data :
+    {
+        *(.data*)
+    }
+
+    /* Section is zeroed in u64 chunks, align start and end to 8 bytes */
+    .bss ALIGN(8):
+    {
         __bss_start = .;
-        *(.bss .bss.*)
-        *(COMMON)
+        *(.bss*);
+        . = ALIGN(8);
         __bss_end = .;
     }
-    _end = .;
 
-   /DISCARD/ : { *(.comment) *(.gnu*) *(.note*) *(.eh_frame*) }
+    /DISCARD/ : { *(.comment*) }
 }

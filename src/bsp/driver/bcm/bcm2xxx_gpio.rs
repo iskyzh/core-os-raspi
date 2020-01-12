@@ -94,7 +94,7 @@ impl GPIOInner {
 //--------------------------------------------------------------------------------------------------
 // BSP-public
 //--------------------------------------------------------------------------------------------------
-use spin::Mutex;
+use arch::Mutex;
 
 /// The driver's main struct.
 pub struct GPIO {
@@ -112,7 +112,7 @@ impl GPIO {
     ///
     /// TX to pin 14
     /// RX to pin 15
-    pub fn map_pl011_uart(&self) {
+    pub fn map_pl011_uart(&mut self) {
         let inner = self.inner.lock();
         // Map to pins.
         inner

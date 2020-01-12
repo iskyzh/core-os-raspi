@@ -24,3 +24,4 @@ pub mod console {
 
     pub trait Console = Write + Read + Stat;
 }
+

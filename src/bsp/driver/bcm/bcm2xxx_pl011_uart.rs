@@ -10,7 +10,7 @@ use crate::{
 };
 use core::{fmt, ops};
 use register::{mmio::*, register_bitfields, register_structs};
-use spin::Mutex;
+use arch::Mutex;
 
 // PL011 UART registers.
 //
