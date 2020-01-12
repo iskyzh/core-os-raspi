@@ -10,6 +10,7 @@ edition = "2018"
 cortex-a = "2.8.2"
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 spin = "0.5.2"
+register = "0.4.2"
 
 [profile.dev]
 panic = "abort"
