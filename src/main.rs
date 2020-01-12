@@ -5,6 +5,9 @@
 #![feature(global_asm)]
 #![feature(panic_info_message)]
 
+#[macro_use]
+extern crate lazy_static;
+
 mod arch;
 mod bsp;
 mod memory;

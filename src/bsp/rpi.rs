@@ -6,6 +6,11 @@ pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
 const QEMU_CONSOLE_ADDR: u64 = 0x3F20_1000;
 
 use core::fmt;
+use spin::Mutex;
+
+lazy_static! {
+    pub static ref CONSOLE: Mutex<QEMUConsole> = Mutex::new(QEMUConsole {});
+}
 
 impl fmt::Write for QEMUConsole {
     fn write_str(&mut self, s: &str) -> fmt::Result {
@@ -18,6 +23,3 @@ impl fmt::Write for QEMUConsole {
     }
 }
 
-pub fn console() -> impl fmt::Write {
-    QEMUConsole {}
-}

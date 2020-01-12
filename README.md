@@ -12,4 +12,6 @@ An OS in Rust.
 
 ## Progress
 
-* [-] Make a bare-metal binary [1,2]
+- [x] Make a bare-metal binary [1,2]
+- [x] QEMU console object, eliminate assembly usage [1]
+- [x] Make global static [3]
