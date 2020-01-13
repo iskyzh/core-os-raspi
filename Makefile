@@ -44,6 +44,8 @@ readelf:
 raspbootcom:
 	cd vendor/raspbootcom/raspbootcom && make
 
+raspi: $(OUTPUT)
+	./serialboot.py
 clean:
 	rm -rf target
 FORCE:
