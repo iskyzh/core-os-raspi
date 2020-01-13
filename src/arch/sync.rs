@@ -4,7 +4,6 @@
 
 //! Synchronization primitives.
 
-use crate::interface;
 use core::cell::UnsafeCell;
 
 //--------------------------------------------------------------------------------------------------

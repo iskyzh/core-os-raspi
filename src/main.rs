@@ -6,17 +6,12 @@
 #![feature(panic_info_message)]
 #![feature(trait_alias)]
 
-#[macro_use]
-extern crate lazy_static;
-
 mod arch;
 mod bsp;
 mod memory;
 mod panic_handler;
 mod print;
 mod interface;
-
-use interface::console::Stat;
 
 pub unsafe fn runtime_init() -> ! {
     use memory::zero_bss;
@@ -33,7 +28,7 @@ fn kernel_init() -> ! {
         }
     }
     bsp::post_driver_init();
-    bsp::console().write_char('a');
+    
     kernel_main()
 }
 
@@ -44,7 +39,7 @@ fn kernel_main() -> ! {
             break;
         }
     }
-    
+
     println!("[1] Hello, World!");
     let chars_written = bsp::console().chars_written();
     println!("chars written: {}", chars_written);

@@ -269,7 +269,7 @@ impl console::Write for PL011Uart {
     }
 
     fn write_fmt(&mut self, args: core::fmt::Arguments) -> fmt::Result {
-        let mut inner = self.inner.lock();
+        let inner = self.inner.lock();
         fmt::Write::write_fmt(&mut *inner, args)
     }
 }
