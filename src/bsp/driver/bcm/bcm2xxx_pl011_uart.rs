@@ -272,6 +272,13 @@ impl console::Write for PL011Uart {
         let inner = self.inner.lock();
         fmt::Write::write_fmt(&mut *inner, args)
     }
+
+    fn flush(&mut self) {
+        let inner = self.inner.lock();
+        while !inner.FR.matches_all(FR::TXFE::SET) {
+            arch::nop();
+        }
+    }
 }
 
 impl console::Read for PL011Uart {
@@ -294,6 +301,13 @@ impl console::Read for PL011Uart {
         inner.chars_read += 1;
 
         ret
+    }
+
+    fn clear(&mut self) {
+        let inner = self.inner.lock();
+        while !inner.FR.matches_all(FR::RXFE::SET) {
+            inner.DR.get();
+        }
     }
 }
 

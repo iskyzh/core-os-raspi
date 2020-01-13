@@ -11,17 +11,24 @@ pub mod console {
     pub trait Write {
         fn write_char(&mut self, c: char);
         fn write_fmt(&mut self, args: core::fmt::Arguments) -> fmt::Result;
+        fn flush(&mut self);
     }
 
     pub trait Read {
-        fn read_char(&mut self) -> char { ' ' }
+        fn read_char(&mut self) -> char {
+            ' '
+        }
+        fn clear(&mut self);
     }
 
     pub trait Stat {
-        fn chars_written(&self) -> usize { 0 }
-        fn chars_read(&self) -> usize { 0 }
+        fn chars_written(&self) -> usize {
+            0
+        }
+        fn chars_read(&self) -> usize {
+            0
+        }
     }
 
     pub trait Console = Write + Read + Stat;
 }
-

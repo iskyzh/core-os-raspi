@@ -16,3 +16,11 @@ panic = "abort"
 
 [profile.release]
 panic = "abort"
+
+[[bin]]
+name = "bootloader"
+path = "src/bootloader.rs"
+
+[[bin]]
+name = "core-os-rust"
+path = "src/main.rs"

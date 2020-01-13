@@ -12,13 +12,8 @@ mod memory;
 mod panic_handler;
 mod print;
 mod interface;
-
-pub unsafe fn runtime_init() -> ! {
-    use memory::zero_bss;
-    zero_bss();
-
-    kernel_init()
-}
+mod relocate;
+mod runtime_init;
 
 fn kernel_init() -> ! {
     use interface::console::*;
