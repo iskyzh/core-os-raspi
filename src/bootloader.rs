@@ -29,8 +29,8 @@ fn kernel_init() -> ! {
 fn kernel_main() -> ! {
     use interface::console::*;
 
-    println!("--- core-os remote bootloader ---");
-    println!("waiting for binary...");
+    println!("--- starting remote booting sequence ---");
+    println!("--> [1] waiting for binary...");
 
     bsp::console().flush();
     bsp::console().clear();
@@ -45,7 +45,9 @@ fn kernel_main() -> ! {
     size |= u32::from(bsp::console().read_char() as u8) << 16;
     size |= u32::from(bsp::console().read_char() as u8) << 24;
 
-    println!("OK, binary size: {}", size);
+    println!("--> [2] ok, binary size: {}", size);
+
+    print!("--> [3] retriving data ");
 
     let kernel_addr: *mut u8 = bsp::BOARD_DEFAULT_LOAD_ADDRESS as *mut u8;
     unsafe {
@@ -57,7 +59,7 @@ fn kernel_main() -> ! {
         }
     }
     println!("");
-    println!("binary loaded, jumping to kernel...");
+    println!("--> [4] binary loaded, jumping to kernel...");
 
     bsp::console().flush();
 

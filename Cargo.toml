@@ -18,9 +18,9 @@ panic = "abort"
 panic = "abort"
 
 [[bin]]
-name = "bootloader"
-path = "src/bootloader.rs"
-
-[[bin]]
 name = "core-os-rust"
 path = "src/main.rs"
+
+[[bin]]
+name = "bootloader"
+path = "src/bootloader.rs"

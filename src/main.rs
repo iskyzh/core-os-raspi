@@ -16,9 +16,13 @@ mod relocate;
 mod runtime_init;
 
 fn kernel_init() -> ! {
+    println!("--- core-os kernel ---");
+    println!("[1] loading drivers...");
     for i in bsp::device_drivers().iter_mut() {
         if let Err(()) = i.init() {
-            panic!("Error loading driver: {}", i.name())
+            panic!("error loading driver: {}", i.name())
+        } else {
+            println!("  {}", i.name());
         }
     }
     bsp::post_driver_init();
