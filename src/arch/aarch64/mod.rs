@@ -1,6 +1,13 @@
 use cortex_a::{asm, regs::*};
 use crate::bsp;
 
+mod sync;
+pub use sync::*;
+pub use sync::NullLock as Mutex;
+
+mod time;
+pub use time::*;
+
 #[no_mangle]
 pub unsafe extern "C" fn _start() -> ! {
     const CORE_MASK: u64 = 0x3;
@@ -25,4 +32,10 @@ pub fn spin_for_cycles(n: usize) {
     for _ in 0..n {
         nop();
     }
+}
+
+static TIMER: Timer = Timer {};
+
+pub fn timer() -> &'static impl crate::interface::time::Timer {
+    &TIMER
 }

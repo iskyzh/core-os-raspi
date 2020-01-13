@@ -32,3 +32,15 @@ pub mod console {
 
     pub trait Console = Write + Read + Stat;
 }
+
+pub mod time {
+    use core::time::Duration;
+
+    pub trait Timer {
+        fn resolution(&self) -> Duration;
+
+        fn uptime(&self) -> Duration;
+
+        fn spin_for(&self, duration: Duration);
+    }
+}

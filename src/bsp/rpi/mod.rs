@@ -5,7 +5,7 @@ use crate::interface::{console, driver::Driver};
 
 pub const BOOT_CORE_ID: u64 = 0;
 pub const BOOT_CORE_STACK_START: u64 = 0x80_000;
-pub const BOARD_DEFAULT_LOAD_ADDRESS: usize = 0x80_000;
+// pub const BOARD_DEFAULT_LOAD_ADDRESS: usize = 0x80_000;
 
 static mut GPIO: driver::GPIO = driver::GPIO::new(memory_map::mmio::GPIO_BASE);
 static mut PL011_UART: driver::PL011Uart = unsafe { driver::PL011Uart::new(memory_map::mmio::PL011_UART_BASE) };

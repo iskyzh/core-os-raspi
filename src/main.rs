@@ -15,13 +15,9 @@ mod interface;
 mod runtime_init;
 
 fn kernel_init() -> ! {
-    println!("--- core-os kernel ---");
-    println!("[1] loading drivers...");
-    for i in bsp::device_drivers().iter_mut() {
-        if let Err(()) = i.init() {
-            panic!("error loading driver: {}", i.name())
-        } else {
-            println!("  {}", i.name());
+    for driver in bsp::device_drivers().iter_mut() {
+        if let Err(()) = driver.init() {
+            panic!("error loading driver: {}", driver.name())
         }
     }
     bsp::post_driver_init();
@@ -30,13 +26,15 @@ fn kernel_init() -> ! {
 }
 
 fn kernel_main() -> ! {
-    use interface::console::*;
-    println!("[1] Hello, World!");
-    let chars_written = bsp::console().chars_written();
-    println!("chars written: {}", chars_written);
-    println!("[2] Echo...");
+    use interface::{console::*, time::*};
+    use core::time::Duration;
+    info!("kernel intialized");
+    info!("driver loaded:");
+    for (i, driver) in bsp::device_drivers().iter_mut().enumerate() {
+        info!("  {} {}", i, driver.name());
+    }
     loop {
-        let c = bsp::console().read_char();
-        bsp::console().write_char(c);
+        info!("spinning for 1secs");
+        arch::timer().spin_for(Duration::from_secs(1));
     }
 }
