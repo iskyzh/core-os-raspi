@@ -29,7 +29,7 @@ fn kernel_init() -> ! {
 fn kernel_main() -> ! {
     use interface::console::*;
 
-    println!("--- core-os bootloader ---");
+    println!("--- core-os remote bootloader ---");
     println!("waiting for binary...");
 
     bsp::console().flush();
@@ -45,7 +45,7 @@ fn kernel_main() -> ! {
     size |= u32::from(bsp::console().read_char() as u8) << 16;
     size |= u32::from(bsp::console().read_char() as u8) << 24;
 
-    println!("binary size: {}", size);
+    println!("OK, binary size: {}", size);
 
     let kernel_addr: *mut u8 = bsp::BOARD_DEFAULT_LOAD_ADDRESS as *mut u8;
     unsafe {

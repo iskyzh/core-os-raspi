@@ -289,18 +289,10 @@ impl console::Read for PL011Uart {
             arch::nop();
         }
 
-        // Read one character.
-        let mut ret = inner.DR.get() as u8 as char;
-
-        // Convert carrige return to newline.
-        if ret == '\r' {
-            ret = '\n'
-        }
-
-        // Update statistics.
         inner.chars_read += 1;
-
-        ret
+        
+        // Read one character.
+        inner.DR.get() as u8 as char
     }
 
     fn clear(&mut self) {

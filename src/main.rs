@@ -16,7 +16,6 @@ mod relocate;
 mod runtime_init;
 
 fn kernel_init() -> ! {
-    use interface::console::*;
     for i in bsp::device_drivers().iter_mut() {
         if let Err(()) = i.init() {
             panic!("Error loading driver: {}", i.name())
@@ -29,12 +28,6 @@ fn kernel_init() -> ! {
 
 fn kernel_main() -> ! {
     use interface::console::*;
-    loop {
-        if bsp::console().read_char() == '\n' {
-            break;
-        }
-    }
-
     println!("[1] Hello, World!");
     let chars_written = bsp::console().chars_written();
     println!("chars written: {}", chars_written);
