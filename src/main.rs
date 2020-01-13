@@ -12,7 +12,6 @@ mod memory;
 mod panic_handler;
 mod print;
 mod interface;
-mod relocate;
 mod runtime_init;
 
 fn kernel_init() -> ! {

@@ -1,32 +1,27 @@
 TARGET = aarch64-unknown-none-softfloat
 OUTPUT = kernel8.img
-BOOTLOADER_OUTPUT = bootloader.img
 QEMU_BINARY = qemu-system-aarch64
 QEMU_MACHINE_TYPE = raspi3
 QEMU_MISC_ARGS = -serial mon:stdio -display none
 QEMU_MISC_ARGS_BOOTLOADER = -serial stdio -display none
 LINKER_FILE = src/bsp/rpi/link.ld
-RUSTC_MISC_ARGS = -C target-cpu=cortex-a53 -C relocation-model=pic
+RUSTC_MISC_ARGS = -C target-cpu=cortex-a53
 RUSTFLAGS = -C link-arg=-T$(LINKER_FILE) $(RUSTC_MISC_ARGS)
 TARGET_TYPE = release
 CARGO_OUTPUT = target/$(TARGET)/$(TARGET_TYPE)/core-os-rust
-CARGO_BOOTLOADER_OUTPUT = target/$(TARGET)/$(TARGET_TYPE)/bootloader
 OBJCOPY_CMD = cargo objcopy \
 		-- \
 		--strip-all \
 		-O binary
 DEMO_PAYLOAD = demo_payload_rpi3.img
 
-all: $(OUTPUT) $(BOOTLOADER_OUTPUT)
+all: $(OUTPUT)
 
 $(CARGO_OUTPUT): FORCE
-	RUSTFLAGS="$(RUSTFLAGS)" cargo xbuild --target $(TARGET) --release
+	RUSTFLAGS="$(RUSTFLAGS)" cargo xbuild --target $(TARGET) --bin core-os-rust --release
 
 $(OUTPUT): $(CARGO_OUTPUT)
 	$(OBJCOPY_CMD) $< ./$(OUTPUT)
-
-$(BOOTLOADER_OUTPUT) : $(CARGO_BOOTLOADER_OUTPUT)
-	$(OBJCOPY_CMD) $< ./$(BOOTLOADER_OUTPUT)
 
 qemu: all
 	$(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE) -kernel $(OUTPUT) $(QEMU_MISC_ARGS)
@@ -35,7 +30,7 @@ qemudemo: all
 	$(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE) -kernel $(DEMO_PAYLOAD) $(QEMU_MISC_ARGS)
 
 qemuboot: all
-	./boot.py | $(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE) -kernel bootloader.img $(QEMU_MISC_ARGS_BOOTLOADER)
+	./boot.py | $(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE) -kernel bootloader.alex_chi.img $(QEMU_MISC_ARGS_BOOTLOADER)
 
 qemuasm: all
 	$(QEMU_BINARY) -M $(QEMU_MACHINE_TYPE) -kernel $(OUTPUT) $(QEMU_MISC_ARGS) -d in_asm

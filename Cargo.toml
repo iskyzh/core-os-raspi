@@ -21,6 +21,3 @@ panic = "abort"
 name = "core-os-rust"
 path = "src/main.rs"
 
-[[bin]]
-name = "bootloader"
-path = "src/bootloader.rs"

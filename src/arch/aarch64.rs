@@ -6,7 +6,7 @@ pub unsafe extern "C" fn _start() -> ! {
     const CORE_MASK: u64 = 0x3;
     if bsp::BOOT_CORE_ID == MPIDR_EL1.get() & CORE_MASK {
         SP.set(bsp::BOOT_CORE_STACK_START);
-        crate::relocate::relocate_self::<u64>()
+        crate::runtime_init::runtime_init();
     } else {
         wait_forever()
     }
