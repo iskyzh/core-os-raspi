@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
+// SPDX-License-Identifier: MIT
 //
-// Copyright (c) 2018-2020 Andre Richter <andre.o.richter@gmail.com>
+// Copyright (c) 2020 Alex Chi <iskyzh@gmail.com>
 
 // Rust embedded logo for `make doc`.
 #![doc(html_logo_url = "https://git.io/JeGIp")]
@@ -42,6 +42,7 @@ mod interface;
 mod memory;
 mod panic_wait;
 mod print;
+mod test;
 
 /// Early init code.
 ///
@@ -102,34 +103,6 @@ fn kernel_main() -> ! {
         info!("      {}. {}", i + 1, driver.compatible());
     }
 
-    info!("Timer test, spinning for 1 second");
-    arch::timer().spin_for(Duration::from_secs(1));
-
-    // Cause an exception by accessing a virtual address for which no translation was set up. This
-    // code accesses the address 8 GiB, which is outside the mapped address space.
-    //
-    // For demo purposes, the exception handler will catch the faulting 8 GiB address and allow
-    // execution to continue.
-    info!("");
-    info!("Trying to write to address 8 GiB...");
-    let mut big_addr: u64 = 8 * 1024 * 1024 * 1024;
-    unsafe { core::ptr::read_volatile(big_addr as *mut u64) };
-
-    info!("************************************************");
-    info!("Whoa! We recovered from a synchronous exception!");
-    info!("************************************************");
-    info!("");
-    info!("Let's try again");
-
-    // Now use address 9 GiB. The exception handler won't forgive us this time.
-    info!("Trying to write to address 9 GiB...");
-    big_addr = 9 * 1024 * 1024 * 1024;
-    unsafe { core::ptr::read_volatile(big_addr as *mut u64) };
-
-    // Will never reach here in this tutorial.
-    info!("Echoing input now");
-    loop {
-        let c = bsp::console().read_char();
-        bsp::console().write_char(c);
-    }
+    info!("Running tests...");
+    test::test()
 }
