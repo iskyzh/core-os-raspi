@@ -1,49 +1,45 @@
-use crate::bsp;
-use cortex_a::{asm, regs::*};
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+// Copyright (c) 2018-2020 Andre Richter <andre.o.richter@gmail.com>
 
-mod sync;
-pub use sync::NullLock as Mutex;
-pub use sync::*;
-
-mod time;
-pub use time::*;
+//! AArch64.
 
 mod exception;
-pub use exception::*;
+mod mmu;
+pub mod sync;
+mod time;
 
+use crate::{bsp, interface};
+use cortex_a::{asm, regs::*};
+
+/// The entry of the `kernel` binary.
+///
+/// The function must be named `_start`, because the linker is looking for this exact name.
+///
+/// # Safety
+///
+/// - Linker script must ensure to place this function at `0x80_000`.
 #[no_mangle]
 pub unsafe extern "C" fn _start() -> ! {
     const CORE_MASK: u64 = 0x3;
-    if bsp::BOOT_CORE_ID == MPIDR_EL1.get() & CORE_MASK
+
+    // Expect the boot core to start in EL2.
+    if (bsp::BOOT_CORE_ID == MPIDR_EL1.get() & CORE_MASK)
         && (CurrentEL.get() == CurrentEL::EL::EL2.value)
     {
-        el2_to_el1_transition();
+        el2_to_el1_transition()
     } else {
+        // If not core0, infinitely wait for events.
         wait_forever()
     }
 }
 
-#[inline(always)]
-pub fn wait_forever() -> ! {
-    loop {
-        asm::wfe()
-    }
-}
-
-pub use asm::nop;
-
-pub fn spin_for_cycles(n: usize) {
-    for _ in 0..n {
-        nop();
-    }
-}
-
-static TIMER: Timer = Timer {};
-
-pub fn timer() -> &'static impl crate::interface::time::Timer {
-    &TIMER
-}
-
+/// Transition from EL2 to EL1.
+///
+/// # Safety
+///
+/// - The HW state of EL1 must be prepared in a sound way.
+/// - Exception return from EL2 must must continue execution in EL1 with ´runtime_init::init()`.
 #[inline(always)]
 unsafe fn el2_to_el1_transition() -> ! {
     // Enable timer counter registers for EL1.
@@ -77,6 +73,54 @@ unsafe fn el2_to_el1_transition() -> ! {
     asm::eret()
 }
 
+//--------------------------------------------------------------------------------------------------
+// Global instances
+//--------------------------------------------------------------------------------------------------
+
+static TIMER: time::Timer = time::Timer;
+static MMU: mmu::MMU = mmu::MMU;
+
+//--------------------------------------------------------------------------------------------------
+// Implementation of the kernel's architecture abstraction code
+//--------------------------------------------------------------------------------------------------
+
+pub use asm::nop;
+
+/// Spin for `n` cycles.
+pub fn spin_for_cycles(n: usize) {
+    for _ in 0..n {
+        asm::nop();
+    }
+}
+
+/// Return a reference to a `interface::time::TimeKeeper` implementation.
+pub fn timer() -> &'static impl interface::time::Timer {
+    &TIMER
+}
+
+/// Pause execution on the calling CPU core.
+#[inline(always)]
+pub fn wait_forever() -> ! {
+    loop {
+        asm::wfe()
+    }
+}
+
+/// Enable exception handling.
+///
+/// # Safety
+///
+/// - Changes the HW state of the processing element.
+pub unsafe fn enable_exception_handling() {
+    exception::set_vbar_el1();
+}
+
+/// Return a reference to an `interface::mm::MMU` implementation.
+pub fn mmu() -> &'static impl interface::mm::MMU {
+    &MMU
+}
+
+/// Information about the HW state.
 pub mod state {
     use crate::arch::PrivilegeLevel;
     use cortex_a::regs::*;

@@ -4,6 +4,7 @@
 
 //! Synchronization primitives.
 
+use crate::interface;
 use core::cell::UnsafeCell;
 
 //--------------------------------------------------------------------------------------------------
@@ -35,8 +36,18 @@ impl<T> NullLock<T> {
             data: UnsafeCell::new(data),
         }
     }
+}
 
-    pub fn lock(&self) -> &mut T {
-        unsafe { &mut *self.data.get() }
+//--------------------------------------------------------------------------------------------------
+// OS interface implementations
+//--------------------------------------------------------------------------------------------------
+
+impl<T> interface::sync::Mutex for &NullLock<T> {
+    type Data = T;
+
+    fn lock<R>(&mut self, f: impl FnOnce(&mut Self::Data) -> R) -> R {
+        // In a real lock, there would be code encapsulating this line that ensures that this
+        // mutable reference will ever only be given out once at a time.
+        f(unsafe { &mut *self.data.get() })
     }
 }

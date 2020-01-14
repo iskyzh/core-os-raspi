@@ -1,13 +1,26 @@
-use crate::interface::time;
+// SPDX-License-Identifier: MIT OR Apache-2.0
+//
+// Copyright (c) 2018-2020 Andre Richter <andre.o.richter@gmail.com>
+
+//! Timer primitives.
+
+use crate::{interface, warn};
 use core::time::Duration;
 use cortex_a::regs::*;
-use crate::warn;
-
-pub struct Timer;
 
 const NS_PER_S: u64 = 1_000_000_000;
 
-impl time::Timer for Timer {
+//--------------------------------------------------------------------------------------------------
+// Arch-public
+//--------------------------------------------------------------------------------------------------
+
+pub struct Timer;
+
+//--------------------------------------------------------------------------------------------------
+// OS interface implementations
+//--------------------------------------------------------------------------------------------------
+
+impl interface::time::Timer for Timer {
     fn resolution(&self) -> Duration {
         Duration::from_nanos(NS_PER_S / (CNTFRQ_EL0.get() as u64))
     }

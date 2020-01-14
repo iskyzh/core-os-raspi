@@ -4,7 +4,7 @@
 
 //! GPIO driver.
 
-use crate::{arch, interface::driver};
+use crate::{arch, arch::sync::NullLock, interface};
 use core::ops;
 use register::{mmio::ReadWrite, register_bitfields, register_structs};
 
@@ -94,17 +94,17 @@ impl GPIOInner {
 //--------------------------------------------------------------------------------------------------
 // BSP-public
 //--------------------------------------------------------------------------------------------------
-use arch::Mutex;
+use interface::sync::Mutex;
 
 /// The driver's main struct.
 pub struct GPIO {
-    inner: Mutex<GPIOInner>,
+    inner: NullLock<GPIOInner>,
 }
 
 impl GPIO {
-    pub const fn new(base_addr: usize) -> GPIO {
+    pub const unsafe fn new(base_addr: usize) -> GPIO {
         GPIO {
-            inner: Mutex::new(GPIOInner::new(base_addr)),
+            inner: NullLock::new(GPIOInner::new(base_addr)),
         }
     }
 
@@ -112,27 +112,34 @@ impl GPIO {
     ///
     /// TX to pin 14
     /// RX to pin 15
-    pub fn map_pl011_uart(&mut self) {
-        let inner = self.inner.lock();
-        // Map to pins.
-        inner
-            .GPFSEL1
-            .modify(GPFSEL1::FSEL14::AltFunc0 + GPFSEL1::FSEL15::AltFunc0);
+    pub fn map_pl011_uart(&self) {
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            // Map to pins.
+            inner
+                .GPFSEL1
+                .modify(GPFSEL1::FSEL14::AltFunc0 + GPFSEL1::FSEL15::AltFunc0);
 
-        // Enable pins 14 and 15.
-        inner.GPPUD.set(0);
-        arch::spin_for_cycles(150);
+            // Enable pins 14 and 15.
+            inner.GPPUD.set(0);
+            arch::spin_for_cycles(150);
 
-        inner
-            .GPPUDCLK0
-            .write(GPPUDCLK0::PUDCLK14::AssertClock + GPPUDCLK0::PUDCLK15::AssertClock);
-        arch::spin_for_cycles(150);
+            inner
+                .GPPUDCLK0
+                .write(GPPUDCLK0::PUDCLK14::AssertClock + GPPUDCLK0::PUDCLK15::AssertClock);
+            arch::spin_for_cycles(150);
 
-        inner.GPPUDCLK0.set(0);
+            inner.GPPUDCLK0.set(0);
+        })
     }
 }
 
-impl driver::Driver for GPIO {
-    fn init(&mut self) -> driver::Result { Ok(()) }
-    fn name(&self) -> &'static str { "GPIO" }
+//--------------------------------------------------------------------------------------------------
+// OS interface implementations
+//--------------------------------------------------------------------------------------------------
+
+impl interface::driver::DeviceDriver for GPIO {
+    fn compatible(&self) -> &str {
+        "GPIO"
+    }
 }

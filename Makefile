@@ -8,7 +8,7 @@ LINKER_FILE = src/bsp/rpi/link.ld
 RUSTC_MISC_ARGS = -C target-cpu=cortex-a53
 RUSTFLAGS = -C link-arg=-T$(LINKER_FILE) $(RUSTC_MISC_ARGS)
 TARGET_TYPE = release
-CARGO_OUTPUT = target/$(TARGET)/$(TARGET_TYPE)/core-os-rust
+CARGO_OUTPUT = target/$(TARGET)/$(TARGET_TYPE)/core-os
 OBJCOPY_CMD = cargo objcopy \
 		-- \
 		--strip-all \
@@ -18,7 +18,7 @@ DEMO_PAYLOAD = demo_payload_rpi3.img
 all: $(OUTPUT)
 
 $(CARGO_OUTPUT): FORCE
-	RUSTFLAGS="$(RUSTFLAGS)" cargo xbuild --target $(TARGET) --bin core-os-rust --release
+	RUSTFLAGS="$(RUSTFLAGS)" cargo xbuild --target $(TARGET) --release
 
 $(OUTPUT): $(CARGO_OUTPUT)
 	$(OBJCOPY_CMD) $< ./$(OUTPUT)
@@ -48,4 +48,7 @@ raspi: $(OUTPUT)
 	./serialboot.py
 clean:
 	rm -rf target
+docs:
+	cargo xdoc --target=$(TARGET) --document-private-items
+
 FORCE:

@@ -36,6 +36,12 @@ unsafe fn zero_bss() {
     memory::zero_volatile(bss_range());
 }
 
+/// Equivalent to `crt0` or `c0` code in C/C++ world. Clears the `bss` section, then jumps to kernel
+/// init code.
+///
+/// # Safety
+///
+/// - Only a single core must be active and running this function.
 pub unsafe fn runtime_init() -> ! {
     zero_bss();
 

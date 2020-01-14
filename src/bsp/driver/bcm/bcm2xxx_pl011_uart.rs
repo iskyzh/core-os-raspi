@@ -4,13 +4,9 @@
 
 //! PL011 UART driver.
 
-use crate::{
-    arch,
-    interface::{console, driver},
-};
+use crate::{arch, arch::sync::NullLock, interface};
 use core::{fmt, ops};
 use register::{mmio::*, register_bitfields, register_structs};
-use arch::Mutex;
 
 // PL011 UART registers.
 //
@@ -235,7 +231,7 @@ pub use PL011UartInner as PanicUart;
 
 /// The driver's main struct.
 pub struct PL011Uart {
-    inner: Mutex<PL011UartInner>,
+    inner: NullLock<PL011UartInner>,
 }
 
 impl PL011Uart {
@@ -244,7 +240,7 @@ impl PL011Uart {
     /// The user must ensure to provide the correct `base_addr`.
     pub const unsafe fn new(base_addr: usize) -> PL011Uart {
         PL011Uart {
-            inner: Mutex::new(PL011UartInner::new(base_addr)),
+            inner: NullLock::new(PL011UartInner::new(base_addr)),
         }
     }
 }
@@ -252,63 +248,90 @@ impl PL011Uart {
 //--------------------------------------------------------------------------------------------------
 // OS interface implementations
 //--------------------------------------------------------------------------------------------------
+use interface::sync::Mutex;
 
-impl driver::Driver for PL011Uart {
-    fn init(&mut self) -> driver::Result {
-        self.inner.lock().init();
+impl interface::driver::DeviceDriver for PL011Uart {
+    fn compatible(&self) -> &str {
+        "PL011Uart"
+    }
+
+    fn init(&self) -> interface::driver::Result {
+        let mut r = &self.inner;
+        r.lock(|inner| inner.init());
+
         Ok(())
     }
-    fn name(&self) -> &'static str { "PL011Uart" }
 }
 
-impl console::Write for PL011Uart {
+impl interface::console::Write for PL011Uart {
     /// Passthrough of `args` to the `core::fmt::Write` implementation, but guarded by a Mutex to
     /// serialize access.
-    fn write_char(&mut self, c: char) {
-        self.inner.lock().write_char(c);
+    fn write_char(&self, c: char) {
+        let mut r = &self.inner;
+        r.lock(|inner| inner.write_char(c));
     }
 
-    fn write_fmt(&mut self, args: core::fmt::Arguments) -> fmt::Result {
-        let inner = self.inner.lock();
-        fmt::Write::write_fmt(&mut *inner, args)
+    fn write_fmt(&self, args: core::fmt::Arguments) -> fmt::Result {
+        // Fully qualified syntax for the call to `core::fmt::Write::write:fmt()` to increase
+        // readability.
+        let mut r = &self.inner;
+        r.lock(|inner| fmt::Write::write_fmt(inner, args))
     }
 
-    fn flush(&mut self) {
-        let inner = self.inner.lock();
-        while !inner.FR.matches_all(FR::TXFE::SET) {
-            arch::nop();
-        }
-    }
-}
-
-impl console::Read for PL011Uart {
-    fn read_char(&mut self) -> char {
-        let mut inner = self.inner.lock();
-        // Spin while RX FIFO empty is set.
-        while inner.FR.matches_all(FR::RXFE::SET) {
-            arch::nop();
-        }
-
-        inner.chars_read += 1;
-        
-        // Read one character.
-        inner.DR.get() as u8 as char
-    }
-
-    fn clear(&mut self) {
-        let inner = self.inner.lock();
-        while !inner.FR.matches_all(FR::RXFE::SET) {
-            inner.DR.get();
-        }
+    fn flush(&self) {
+        let mut r = &self.inner;
+        // Spin until TX FIFO empty is set.
+        r.lock(|inner| {
+            while !inner.FR.matches_all(FR::TXFE::SET) {
+                arch::nop();
+            }
+        });
     }
 }
 
-impl console::Stat for PL011Uart {
+impl interface::console::Read for PL011Uart {
+    fn read_char(&self) -> char {
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            // Spin while RX FIFO empty is set.
+            while inner.FR.matches_all(FR::RXFE::SET) {
+                arch::nop();
+            }
+
+            // Read one character.
+            let mut ret = inner.DR.get() as u8 as char;
+
+            // Convert carrige return to newline.
+            if ret == '\r' {
+                ret = '\n'
+            }
+
+            // Update statistics.
+            inner.chars_read += 1;
+
+            ret
+        })
+    }
+
+    fn clear(&self) {
+        let mut r = &self.inner;
+        r.lock(|inner| {
+            // Read from the RX FIFO until it is indicating empty.
+            while !inner.FR.matches_all(FR::RXFE::SET) {
+                inner.DR.get();
+            }
+        })
+    }
+}
+
+impl interface::console::Statistics for PL011Uart {
     fn chars_written(&self) -> usize {
-        self.inner.lock().chars_written
+        let mut r = &self.inner;
+        r.lock(|inner| inner.chars_written)
     }
 
     fn chars_read(&self) -> usize {
-        self.inner.lock().chars_read
+        let mut r = &self.inner;
+        r.lock(|inner| inner.chars_read)
     }
 }
