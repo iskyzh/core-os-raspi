@@ -26,9 +26,19 @@ fn kernel_init() -> ! {
 }
 
 fn kernel_main() -> ! {
-    use interface::{console::*, time::*};
+    use interface::time::*;
     use core::time::Duration;
     info!("kernel intialized");
+    let (_, privilege_level) = arch::state::current_privilege_level();
+    info!("current privilege level: {}", privilege_level);
+
+    info!("exception handling state:");
+    arch::state::print_exception_state();
+
+    info!(
+        "architectural timer resolution: {} ns",
+        arch::timer().resolution().as_nanos()
+    );
     info!("driver loaded:");
     for (i, driver) in bsp::device_drivers().iter_mut().enumerate() {
         info!("  {} {}", i, driver.name());
