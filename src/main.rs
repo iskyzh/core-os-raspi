@@ -47,10 +47,7 @@ mod test;
 // Operating system utilities
 mod process;
 mod alloc;
-
-// A simple user program
-mod user;
-
+mod elf;
 
 /// Early init code.
 ///
@@ -85,6 +82,8 @@ unsafe fn kernel_init() -> ! {
     kernel_main()
 }
 
+static USER_PROGRAM: &'static [u8; 131768] = include_bytes!("../target/aarch64-unknown-none-softfloat/release/loop");
+
 /// The main function running after the early init.
 fn kernel_main() -> ! {
     use core::time::Duration;
@@ -113,15 +112,8 @@ fn kernel_main() -> ! {
 
     info!("Running tests...");
     test::test();
-    info!("Running user program");
-    unsafe { user::user_init(); }
-    info!("Try R/W regions");
-    let mut i = 0x00090000;
-    loop {
-        unsafe { *(i as *mut u64) = 0x0; }
-        info!("0x{:X}", i);
-        i += 0x10000;
-    }
+    info!("Running user program...");
+    elf::run_elf(USER_PROGRAM);
     info!("Echoing input now");
     loop {
         let c = bsp::console().read_char();

@@ -2,7 +2,7 @@ TARGET = aarch64-unknown-none-softfloat
 OUTPUT = kernel8.img
 QEMU_BINARY = qemu-system-aarch64
 QEMU_MACHINE_TYPE = raspi3
-QEMU_MISC_ARGS = -serial mon:stdio -display none
+QEMU_MISC_ARGS = -serial stdio -display none
 QEMU_MISC_ARGS_BOOTLOADER = -serial stdio -display none
 LINKER_FILE = src/bsp/rpi/link.ld
 RUSTC_MISC_ARGS = -C target-cpu=cortex-a53
