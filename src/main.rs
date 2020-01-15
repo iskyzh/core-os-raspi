@@ -44,6 +44,14 @@ mod panic_wait;
 mod print;
 mod test;
 
+// Operating system utilities
+mod process;
+mod alloc;
+
+// A simple user program
+mod user;
+
+
 /// Early init code.
 ///
 /// Concerned with with initializing `BSP` and `arch` parts.
@@ -104,5 +112,19 @@ fn kernel_main() -> ! {
     }
 
     info!("Running tests...");
-    test::test()
+    test::test();
+    info!("Running user program");
+    unsafe { user::user_init(); }
+    info!("Try R/W regions");
+    let mut i = 0x00090000;
+    loop {
+        unsafe { *(i as *mut u64) = 0x0; }
+        info!("0x{:X}", i);
+        i += 0x10000;
+    }
+    info!("Echoing input now");
+    loop {
+        let c = bsp::console().read_char();
+        bsp::console().write_char(c);
+    }
 }

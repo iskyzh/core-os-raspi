@@ -30,8 +30,8 @@ fn test_exception() -> Result<(), &'static str> {
     Ok(())
 }
 
-pub fn test() -> ! {
-    let tests : [(&str, fn() -> Result<(), &'static str>); 2] = [ ("Exception", test_exception), ("Timer", test_timer)];
+pub fn test() -> Result<(), ()> {
+    let tests : [(&str, fn() -> Result<(), &'static str>); 0] = [] /* [ ("Exception", test_exception), ("Timer", test_timer)] */;
 
     for (name, func) in tests.iter() {
         print!("Test: {} ...", name);
@@ -48,9 +48,5 @@ pub fn test() -> ! {
 
     // Will never reach here in this tutorial.
     */
-    info!("Echoing input now");
-    loop {
-        let c = bsp::console().read_char();
-        bsp::console().write_char(c);
-    }
+    Ok(())
 }

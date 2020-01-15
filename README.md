@@ -16,3 +16,5 @@ This project is based on "rust-raspi3-OS-tutorials". Original license is preserv
 [2] https://github.com/bztsrc/raspi3-tutorial/
 
 [3] https://os.phil-opp.com/
+
+[4] http://osblog.stephenmarz.com/
